@@ -1,13 +1,15 @@
 import { Routes, Route, NavLink } from "react-router-dom";
-import { Zap, Target, List } from "lucide-react";
+import { Zap, Target, List, Radar } from "lucide-react";
 import Signals from "./pages/Signals";
 import Tracker from "./pages/Tracker";
 import Scanner from "./pages/Scanner";
+import MasterScan from "./pages/MasterScan";
 
 const navLinks = [
-  { to: "/", label: "Signals", icon: Zap },
+  { to: "/", label: "Scanner", icon: Radar },
+  { to: "/signals", label: "Signals", icon: Zap },
   { to: "/tracker", label: "Tracker", icon: Target },
-  { to: "/scanner", label: "All Stocks", icon: List },
+  { to: "/stocks", label: "All Stocks", icon: List },
 ];
 
 export default function App() {
@@ -31,9 +33,10 @@ export default function App() {
       </header>
       <main className="max-w-7xl mx-auto p-4">
         <Routes>
-          <Route path="/" element={<Signals />} />
+          <Route path="/" element={<MasterScan />} />
+          <Route path="/signals" element={<Signals />} />
           <Route path="/tracker" element={<Tracker />} />
-          <Route path="/scanner" element={<Scanner />} />
+          <Route path="/stocks" element={<Scanner />} />
         </Routes>
       </main>
     </div>
