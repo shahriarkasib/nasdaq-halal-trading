@@ -1,14 +1,16 @@
 import { Routes, Route, NavLink } from "react-router-dom";
-import { Zap, Target, List, Radar, LineChart } from "lucide-react";
+import { Zap, Target, List, Radar, LineChart, Layers } from "lucide-react";
 import Signals from "./pages/Signals";
 import Tracker from "./pages/Tracker";
 import Scanner from "./pages/Scanner";
 import MasterScan from "./pages/MasterScan";
 import Chart from "./pages/Chart";
+import SMCChart from "./pages/SMCChart";
 
 const navLinks = [
   { to: "/", label: "Scanner", icon: Radar },
-  { to: "/chart/ABT", label: "Chart", icon: LineChart },
+  { to: "/smc-chart/AAPL", label: "SMC Chart", icon: Layers },
+  { to: "/chart/ABT", label: "Basic Chart", icon: LineChart },
   { to: "/signals", label: "Signals", icon: Zap },
   { to: "/tracker", label: "Tracker", icon: Target },
   { to: "/stocks", label: "All Stocks", icon: List },
@@ -36,6 +38,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto p-4">
         <Routes>
           <Route path="/" element={<MasterScan />} />
+          <Route path="/smc-chart/:symbol" element={<SMCChart />} />
           <Route path="/chart/:symbol" element={<Chart />} />
           <Route path="/signals" element={<Signals />} />
           <Route path="/tracker" element={<Tracker />} />
