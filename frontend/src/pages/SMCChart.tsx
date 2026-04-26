@@ -13,7 +13,7 @@ import {
   type Time,
 } from "lightweight-charts";
 import { FVGPrimitive } from "./fvgPrimitive";
-import { GannPrimitive, FibCirclesPrimitive } from "./gannFibPrimitives";
+import { GannPrimitive, FibCirclesPrimitive, type GannFanData, type FibCirclesData } from "./gannFibPrimitives";
 import { OrderBlockPrimitive } from "./orderBlockPrimitive";
 import clsx from "clsx";
 import axios from "axios";
@@ -60,6 +60,24 @@ interface AnalysisData {
   risk_reward: number | null;
   triggers: { icon: string; text: string }[];
 }
+interface AccumulationData {
+  phase: "ACCUMULATION" | "DISTRIBUTION" | "CONSOLIDATION";
+  bias: "bullish" | "bearish" | "neutral";
+  confidence: "LOW" | "MEDIUM" | "HIGH";
+  range_high: number;
+  range_low: number;
+  range_pct: number;
+  target_up: number | null;
+  target_down: number | null;
+  volume_ratio: number;
+  support_tests: number;
+  resistance_tests: number;
+  bars_inside: number;
+  lookback: number;
+  pre_trend_pct: number;
+  summary: string;
+}
+
 interface ChartData {
   symbol: string;
   current_price: number;
@@ -72,9 +90,10 @@ interface ChartData {
   fibonacci: { levels: { label: string; price: number }[] } | null;
   pivots: Record<string, number> | null;
   moving_averages: Record<string, { time: string; value: number }[]>;
-  gann_fan: any;
-  fib_circles: any;
+  gann_fan: GannFanData | null;
+  fib_circles: FibCirclesData | null;
   analysis: AnalysisData;
+  accumulation?: AccumulationData | null;
 }
 
 interface Toggles {
@@ -579,6 +598,91 @@ export default function SMCChart() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Accumulation / Distribution card */}
+      {data?.accumulation && (
+        <div
+          className="mb-4 rounded-lg border-2 overflow-hidden"
+          style={{
+            borderColor:
+              data.accumulation.bias === "bullish" ? "#14b8a6" :
+              data.accumulation.bias === "bearish" ? "#ef4444" :
+              "#a78bfa",
+          }}
+        >
+          <div
+            className="px-4 py-2 flex items-center gap-3 flex-wrap"
+            style={{
+              background:
+                data.accumulation.bias === "bullish" ? "rgba(20,184,166,0.1)" :
+                data.accumulation.bias === "bearish" ? "rgba(239,68,68,0.1)" :
+                "rgba(167,139,250,0.1)",
+            }}
+          >
+            <span
+              className={clsx(
+                "px-2 py-0.5 rounded-full text-xs font-bold tracking-wide",
+                data.accumulation.phase === "ACCUMULATION" && "bg-teal-500/25 text-teal-300",
+                data.accumulation.phase === "DISTRIBUTION" && "bg-red-500/25 text-red-300",
+                data.accumulation.phase === "CONSOLIDATION" && "bg-violet-500/25 text-violet-300",
+              )}
+            >
+              📊 {data.accumulation.phase}
+            </span>
+            <span className="text-xs text-gray-500">
+              Confidence: <strong>{data.accumulation.confidence}</strong>
+            </span>
+            {data.accumulation.target_up !== null && (
+              <span className="text-sm font-mono text-teal-400">
+                Breakout target: ${data.accumulation.target_up}
+              </span>
+            )}
+            {data.accumulation.target_down !== null && (
+              <span className="text-sm font-mono text-red-400">
+                Breakdown target: ${data.accumulation.target_down}
+              </span>
+            )}
+          </div>
+          <div className="px-4 py-2 bg-gray-900/40 text-xs">
+            <p className="mb-2">{data.accumulation.summary}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+              <div>
+                <span className="text-gray-500">Range:</span>{" "}
+                <span className="font-mono">
+                  ${data.accumulation.range_low}–{data.accumulation.range_high}
+                </span>{" "}
+                <span className="text-gray-500">({data.accumulation.range_pct}%)</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Volume:</span>{" "}
+                <span className={clsx(
+                  "font-mono",
+                  data.accumulation.volume_ratio >= 1.2 ? "text-emerald-400" :
+                  data.accumulation.volume_ratio >= 0.8 ? "text-yellow-400" :
+                  "text-gray-500",
+                )}>
+                  {data.accumulation.volume_ratio}x
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Tests:</span>{" "}
+                <span className="font-mono">
+                  {data.accumulation.support_tests}↓ / {data.accumulation.resistance_tests}↑
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Pre-trend:</span>{" "}
+                <span className={clsx(
+                  "font-mono",
+                  data.accumulation.pre_trend_pct < 0 ? "text-red-400" : "text-emerald-400",
+                )}>
+                  {data.accumulation.pre_trend_pct > 0 ? "+" : ""}{data.accumulation.pre_trend_pct}%
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
